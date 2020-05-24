@@ -95,16 +95,18 @@ public class EcgView extends View {
             float[] temp = new float[len];
 //            System.arraycopy(ints, 10*125*i, temp, 0, len);
             for (int m = 0; m<len; m++) {
-                temp[m] = (float) Math.random();
+                temp[m] = (float) (Math.sin((double) m/50)*rowheight*0.4);
             }
 
             Path p = new Path();
 
             for (int j = 0; j<len; j++) {
                 if (j == 0) {
-                    p.moveTo(0, temp[0]*rowheight);
+                    p.moveTo(0, temp[0] + rowheight * (i+0.5f));
                 } else {
-                    p.lineTo(j/(125*10f)*mWidth, temp[j]*rowheight + rowheight * i);
+                    float x = (float) mWidth * j / 1250;
+                    float y = temp[j] + rowheight * (i+0.5f);
+                    p.lineTo(x, y);
                 }
             }
 
