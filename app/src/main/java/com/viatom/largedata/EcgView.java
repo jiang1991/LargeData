@@ -11,7 +11,7 @@ import android.view.View;
 
 public class EcgView extends View {
 
-    private int[] ints;
+    private float[] fs;
 
     private Paint paint;
     private Canvas canvas;
@@ -45,8 +45,8 @@ public class EcgView extends View {
         init(attrs, defStyle);
     }
 
-    public void setData(byte[] bytes) {
-        this.ints = ByteUtils.bytes2ints(bytes);
+    public void setData(float[] fs) {
+        this.fs = fs;
 //        this.invalidate();
     }
 
@@ -75,12 +75,12 @@ public class EcgView extends View {
     }
 
     private void drawWave() {
-        if (ints == null) {
+        if (fs == null) {
             canvas.drawText("no data", mWidth/2f, mHeight/2f ,paint);
             return;
         }
 
-        int max = (int) Math.ceil(ints.length / (double) (10*125));
+        int max = (int) Math.ceil(fs.length / (double) (10*125));
 
 
 //        canvas.drawText("max: " + max, mWidth/2f, mHeight/2f ,paint);
@@ -89,23 +89,23 @@ public class EcgView extends View {
             // every row
             int len = 10*125;
             if (i == max-1) {
-                len = ints.length - len * i;
+                len = fs.length - len * i;
             }
 
             float[] temp = new float[len];
-//            System.arraycopy(ints, 10*125*i, temp, 0, len);
-            for (int m = 0; m<len; m++) {
-                temp[m] = (float) (Math.sin((double) m/50)*rowheight*0.4);
-            }
+            System.arraycopy(fs, 10*125*i, temp, 0, len);
+//            for (int m = 0; m<len; m++) {
+//                temp[m] = (float) (Math.sin((double) m/50)*rowheight*0.4);
+//            }
 
             Path p = new Path();
 
             for (int j = 0; j<len; j++) {
                 if (j == 0) {
-                    p.moveTo(0, temp[0] + rowheight * (i+0.5f));
+                    p.moveTo(0, temp[0]*rowheight*0.4f + rowheight * (i+0.5f));
                 } else {
                     float x = (float) mWidth * j / 1250;
-                    float y = temp[j] + rowheight * (i+0.5f);
+                    float y = temp[j]*rowheight*0.4f + rowheight * (i+0.5f);
                     p.lineTo(x, y);
                 }
             }

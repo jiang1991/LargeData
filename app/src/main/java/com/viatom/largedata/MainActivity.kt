@@ -61,7 +61,13 @@ class MainActivity : AppCompatActivity() {
         val assetManager = resources.assets
         val data = assetManager.open("R20200227225237")
         dataSet = data.readBytes()
-        DataController.viewData = dataSet
+        dataSet = dataSet.copyOfRange(10, dataSet.size - 20)
+        val intArray = DataConvert.unCompressAlgECG(dataSet)
+
+        DataController.viewData = FloatArray(intArray.size)
+        for (i in intArray.indices) {
+            DataController.viewData!![i] = (intArray[i] * (1.0035 * 1800) / (4096 * 178.74)).toFloat()
+        }
         Log.d(TAG, "File R20200227225237 size: " + dataSet.size)
     }
 }

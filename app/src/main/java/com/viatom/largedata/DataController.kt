@@ -5,7 +5,7 @@ import kotlin.math.ceil
 object DataController {
 
     // for list
-    var viewData: ByteArray? = null
+    var viewData: FloatArray? = null
     const val step: Int = 125*60*2
     @kotlin.jvm.JvmStatic
     fun getPages(): Int {
@@ -16,7 +16,7 @@ object DataController {
     }
 
     @kotlin.jvm.JvmStatic
-    fun getViewDataByIndex(index: Int) : ByteArray? {
+    fun getViewDataByIndex(index: Int) : FloatArray? {
         var from: Int = index*step
         var to: Int = (index + 1)*step
 

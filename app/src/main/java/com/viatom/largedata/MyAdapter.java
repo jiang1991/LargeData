@@ -38,7 +38,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public void onBindViewHolder(MyViewHolder vh, int p) {
 
-        byte[] viewBytes = DataController.getViewDataByIndex(p);
+        float[] viewBytes = DataController.getViewDataByIndex(p);
         if (viewBytes != null) {
             EcgView ecgView = new EcgView(context);
             ecgView.setData(viewBytes);
