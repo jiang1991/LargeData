@@ -8,6 +8,10 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.min
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,43 +35,56 @@ class MainActivity : AppCompatActivity() {
 //            i -> i
 //        }
 
-        viewAdapter = MyAdapter(this)
-
-        recycleView = findViewById<RecyclerView>(R.id.recycle_view).apply {
-            setHasFixedSize(true)
-            layoutManager = viewManager
-            adapter = viewAdapter
-        }
-
-        seekBar = findViewById<AppCompatSeekBar>(R.id.progress_bar)
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                val p = (progress / 100.toDouble() * DataController.getPages()).toInt()
-                recycleView.scrollToPosition(p)
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                Log.d(TAG, "onStartTrackingTouch: {${seekBar?.progress}}")
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                val percent = (seekBar?.progress?.div(100.toDouble())).toString()
-                Toast.makeText(this@MainActivity, percent, Toast.LENGTH_SHORT).show()
-            }
-        })
+//        viewAdapter = MyAdapter(this)
+//
+//        recycleView = findViewById<RecyclerView>(R.id.recycle_view).apply {
+//            setHasFixedSize(true)
+//            layoutManager = viewManager
+//            adapter = viewAdapter
+//        }
+//
+//        seekBar = findViewById<AppCompatSeekBar>(R.id.progress_bar)
+//        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+//            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+//                val p = (progress / 100.toDouble() * DataController.getPages()).toInt()
+//                recycleView.scrollToPosition(p)
+//            }
+//
+//            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+//                Log.d(TAG, "onStartTrackingTouch: {${seekBar?.progress}}")
+//            }
+//
+//            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+//                val percent = (seekBar?.progress?.div(100.toDouble())).toString()
+//                Toast.makeText(this@MainActivity, percent, Toast.LENGTH_SHORT).show()
+//            }
+//        })
     }
 
     private fun loadData() {
         val assetManager = resources.assets
-        val data = assetManager.open("R20200227225237")
+        val data = assetManager.open("14m.BIN")
         dataSet = data.readBytes()
-        dataSet = dataSet.copyOfRange(10, dataSet.size - 20)
-        val intArray = DataConvert.unCompressAlgECG(dataSet)
 
-        DataController.viewData = FloatArray(intArray.size)
-        for (i in intArray.indices) {
-            DataController.viewData!![i] = (intArray[i] * (1.0035 * 1800) / (4096 * 178.74)).toFloat()
+        // 一小时数据 60*60*128/2*3
+        val hourSize: Int = 60*60*128/2*3
+        val part : Int = ceil(dataSet.size / hourSize.toDouble()).toInt()
+        Log.d("zhixin","readBytes: ${dataSet.size}  part: $part")
+
+        for (i in 0 until part) {
+            val fs = ZhixinUtils.byte2Float(dataSet.copyOfRange(i*hourSize, min((i+1)*hourSize, dataSet.size)))
+            Log.d("fs", Arrays.toString(fs))
         }
-        Log.d(TAG, "File R20200227225237 size: " + dataSet.size)
+
+        Log.d("zhixin", "convent finished")
+
+//        dataSet = dataSet.copyOfRange(10, dataSet.size - 20)
+//        val intArray = DataConvert.unCompressAlgECG(dataSet)
+//
+//        DataController.viewData = FloatArray(intArray.size)
+//        for (i in intArray.indices) {
+//            DataController.viewData!![i] = (intArray[i] * (1.0035 * 1800) / (4096 * 178.74)).toFloat()
+//        }
+//        Log.d(TAG, "File R20200227225237 size: " + dataSet.size)
     }
 }
