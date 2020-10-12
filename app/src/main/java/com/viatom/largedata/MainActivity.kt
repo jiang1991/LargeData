@@ -1,14 +1,22 @@
 package com.viatom.largedata
 
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.hardware.usb.UsbManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
+import android.os.storage.StorageManager
 import android.util.Log
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.min
@@ -16,6 +24,8 @@ import kotlin.math.min
 class MainActivity : AppCompatActivity() {
 
     private val TAG = "large data"
+
+    private val ACTION_USB_PERMISSION = "ACTION_USB_PERMISSION"
 
     private lateinit var dataSet: ByteArray
     private lateinit var recycleView: RecyclerView
@@ -29,36 +39,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        loadData()
+//        loadData()
 
-//        val indexArray = Array(5) {
-//            i -> i
-//        }
-
-//        viewAdapter = MyAdapter(this)
-//
-//        recycleView = findViewById<RecyclerView>(R.id.recycle_view).apply {
-//            setHasFixedSize(true)
-//            layoutManager = viewManager
-//            adapter = viewAdapter
-//        }
-//
-//        seekBar = findViewById<AppCompatSeekBar>(R.id.progress_bar)
-//        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-//            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-//                val p = (progress / 100.toDouble() * DataController.getPages()).toInt()
-//                recycleView.scrollToPosition(p)
-//            }
-//
-//            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-//                Log.d(TAG, "onStartTrackingTouch: {${seekBar?.progress}}")
-//            }
-//
-//            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-//                val percent = (seekBar?.progress?.div(100.toDouble())).toString()
-//                Toast.makeText(this@MainActivity, percent, Toast.LENGTH_SHORT).show()
-//            }
-//        })
+        loadUsb()
     }
 
     private fun loadData() {
@@ -77,14 +60,34 @@ class MainActivity : AppCompatActivity() {
         }
 
         Log.d("zhixin", "convent finished")
+    }
 
-//        dataSet = dataSet.copyOfRange(10, dataSet.size - 20)
-//        val intArray = DataConvert.unCompressAlgECG(dataSet)
-//
-//        DataController.viewData = FloatArray(intArray.size)
-//        for (i in intArray.indices) {
-//            DataController.viewData!![i] = (intArray[i] * (1.0035 * 1800) / (4096 * 178.74)).toFloat()
-//        }
-//        Log.d(TAG, "File R20200227225237 size: " + dataSet.size)
+    private fun loadUsb() {
+
+        try {
+            val manager: StorageManager = this.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+            val mc : Class<StorageManager> = StorageManager::class.java
+            val path : Array<String>  = mc.getMethod("getVolumePaths").invoke(manager) as Array<String>
+
+            for (p in path) {
+                Log.d(TAG, p)
+                val volState = mc.getMethod("getVolumeState", String::class.java).invoke(manager, p)
+                if (Environment.MEDIA_MOUNTED == volState) {
+                    val fileRoot : File = File(p)
+                    for (file in fileRoot.listFiles()) {
+                        Log.d(TAG, file.path)
+
+                        if (file.path == "/storage/5227-C03C/1.BIN") {
+                            val bytes: ByteArray = file.readBytes()
+                            Log.d(TAG, bytes.size.toString())
+                        }
+                    }
+                }
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
     }
 }
